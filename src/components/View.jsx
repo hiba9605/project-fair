@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import Add from './Add'
 import Edit from './Edit'
-import { userProjectAPI } from '../services/allAPI'
-import { addProjectContext } from '../contexts/ContextShare'
+import { deleteProjectAPI, userProjectAPI } from '../services/allAPI'
+import { addProjectContext, editProjectContext } from '../contexts/ContextShare'
 const View = () => {
+
+  const {editProjectResponse,setEditProjectResponse}=useContext(editProjectContext)
 
   const {addProjectResponse,setAddProjectResponse}=useContext(addProjectContext)
   // to display user projects
@@ -13,7 +15,7 @@ const View = () => {
 
   useEffect(()=>{
     getUserProject()
-  },[addProjectResponse])
+  },[addProjectResponse,editProjectResponse])
   
   // 2.create a function for getting all user projects and call api inside that function store all user projects inside the state
 
@@ -43,6 +45,26 @@ const getUserProject=async()=>{
 
 // display array in jsx
 
+
+const removeProject=async(id)=>{
+  const token=sessionStorage.getItem("token")
+  if(token){
+    const reqHeader={
+      "Authorization":`Bearer ${token}`
+    }
+    try{
+      const result=await deleteProjectAPI(id,reqHeader)
+      if(result.status==200){
+        getUserProject()
+      }
+  
+    }catch(err){
+      console.log(err);
+      
+    }
+  }
+}
+
   
 
 
@@ -62,7 +84,7 @@ const getUserProject=async()=>{
             <div className='d-flex align-items-center'>
                 <div> <Edit project={project}/></div>
                 <button className='btn'> <a href={project?.github} target='_blank'> <i className='fa-brands fa-github'></i></a></button>
-                <button className='btn'> <i className='fa-solid fa-trash text-danger'></i></button>
+                <button onClick={()=>removeProject(project?._id)} className='btn'> <i className='fa-solid fa-trash text-danger'></i></button>
 
             </div>
 
